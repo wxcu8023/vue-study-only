@@ -27,11 +27,11 @@
             <numberStyle v-on:listenToChildEvent="getsj($event)" showTxt="00"/>
             <numberStyle v-on:listenToChildEvent="getsj($event)" showTxt="0"/>
             <numberStyle v-on:listenToChildEvent="getResult()" showTxt="="/>
-            <buttonStyle showTxt="清空历史"/>
-            <buttonStyle showTxt="历史记录"/>
+            <buttonStyle v-on:listenToChildEvent="clearHistory()" showTxt="清空历史"/>
+            <buttonStyle v-on:listenToChildEvent="showHistory()" showTxt="历史记录"/>
             <!-- <historyBox/> -->
-            <ul>
-                <li v-for="(hisList, index) in hisLists" :key='index'>{{hisList.text}}</li>
+            <ul class="historyLiBox">
+                <li v-for="(hisList, index) in hisLists" :key='index' v-on:click="history(index)">{{index}}</li>
             </ul>
         </div>
     </div>
@@ -63,14 +63,12 @@ export default {
     data() {
         return {
            postState:{
-                showProcess:"",
+                // showProcess:"",
                 process:'',
                 result:"",
             },
             hisLists:[
-                {text:"1"},
-                {text:"2"},
-                {text:"3"}
+                {"result":30,"process":"36-6"}
             ]
         }
     },
@@ -105,14 +103,38 @@ export default {
             var regNeg = /^(-(([0-9]+\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\.[0-9]+)|([0-9]*[1-9][0-9]*)))$/;
             var process = this.postState.process
              if(regPos.test(process.slice(-1)) || regNeg.test(process.slice(-1))){
-                 this.storageState(this.postState);
+                //  this.storageState(this.postState);
                  this.$store.commit('storageState',this.postState.process)
                 //   this.postState.result = eval(this.postState.process)
              }else{
                  alert("格式错误")
              }
         },
-         ...mapMutations(['storageState'])
+         ...mapMutations(['storageState']),
+        clearHistory(){
+            localStorage.clear();
+        },
+        showHistory(){
+            var myStorage = JSON.parse(localStorage.getItem('mydata'));
+            console.log(myStorage)
+            this.hisLists = myStorage;
+            console.log(this.hisLists)
+        },
+        history(e){
+            var myStorage = JSON.parse(localStorage.getItem('mydata'));
+            console.log(myStorage)
+            if(myStorage != null){
+                if(myStorage[e] == undefined || myStorage[e] == null){
+                    alert("数据不存在")
+                }else{
+                    this.postState = myStorage[e]
+                    console.log(this.postState)
+                }
+            }else{
+                alert('数据不存在')
+            }
+             
+        }
     }
 }
 </script>
@@ -164,5 +186,19 @@ export default {
   margin:0;
   background:linear-gradient(to left,var(--pJbColor1), var(--pJbcolor2));
   margin-bottom:5px;
+}
+.historyLiBox{
+
+}
+.historyLiBox li{
+    width:20px;
+    height:20px;
+    text-align: center;
+    line-height: 20px;
+    color:#000;
+    background:#fff;
+    border:1px solid #eee;
+    margin: 0;
+    padding:0;
 }
 </style>
